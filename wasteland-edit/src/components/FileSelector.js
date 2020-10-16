@@ -4,12 +4,12 @@ import styled from '@emotion/styled'
 
 
 const DropZone = styled.div`
-border: 2px dashed #ddd;
+border: 1px dashed #ddd;
 border-radius: 4px;
-padding: 10px 10px;
+padding: 20px 20px;
 cursor: pointer;
 width: fit-content;
-margin:10px;
+margin: 10px 0;
 `
 
 export default function FileSelector(props) {
