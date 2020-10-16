@@ -51,7 +51,7 @@ function App() {
   const recompress = (data) => {
     const unformatted = unformat(data)
     const newData = compress(unformatted)
-    return { newData, dataSize: unformatted.length, saveDataSize: newData.byteLength }
+    return { newData, dSize: unformatted.length, sdSize: newData.byteLength }
   }
 
   /**
@@ -60,6 +60,7 @@ function App() {
   const downloadTxtFile = () => {
     const element = document.createElement("a");
     const { newData, dSize, sdSize } = recompress(xml)
+    console.log(dSize, sdSize)
     const file = new Blob([newData], { type: 'text/plain' });
     setDataSize(dSize)
     setSaveDataSize(sdSize)
