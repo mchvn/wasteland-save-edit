@@ -1,4 +1,6 @@
-export default Button = styled.button`
+import styled from '@emotion/styled'
+
+export const Button = styled.button`
   padding: 10px;
   background-color: #444;
   cursor: pointer;
