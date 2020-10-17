@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import './App.css';
 import AceEditor from "react-ace";
-import { unformat } from './utils/format'
 import "ace-builds/src-noconflict/mode-xml";
 import "ace-builds/src-noconflict/theme-monokai";
 import 'brace/ext/searchbox'
 import FileSelector from './components/FileSelector'
-import DecompressionWorker from './utils/decompression.worker.js';
-import lzf from 'lzfjs';
 import {Button} from './components/Button'
+import DecompressionWorker from './utils/decompression.worker.js';
+import {recompress} from './utils/compression'
 
 function App() {
 
@@ -27,17 +26,6 @@ function App() {
     setDataSize(dataSize)
     setSaveDataSize(saveDataSize)
     setFileName(fileName)
-  }
-
-  /**
-   * Deformats and recompresses data.
-   * @param {string} data 
-   */
-  const recompress = (data) => {
-    const unformatted = unformat(data)
-    console.log(unformatted)
-    const newData = compress(unformatted)
-    return { newData, dSize: unformatted.length, sdSize: newData.byteLength }
   }
 
   /**
@@ -66,19 +54,10 @@ function App() {
   }
 
   /**
-   * Run the LZF compression algorithm to recompress the XML
-   * @param {string} text 
-   */
-  const compress = (text) => {
-    var data = new Buffer(text);
-    return (lzf.compress(data));
-  }
-
-  /**
-   * Displays file in editor
+   * Decompresses and displays file in editor
    * @param {Blob[]} files 
    */
-  const showFile = async (files) => {
+  const loadFile = async (files) => {
     setXml('Processing...')
     worker.postMessage(files[0])  //just take the first file if mulitple are uploaded... in the future maybe show an error
   }
@@ -98,7 +77,7 @@ function App() {
       <div style={{ margin: '10px' }}>
         <h1>Wasteland 3 Save Editor</h1>
         <div>To begin, load your save file below</div>
-        <FileSelector onFileLoad={showFile} />
+        <FileSelector onFileLoad={loadFile} />
         <AceEditor
           mode="xml"
           theme="monokai"
@@ -108,7 +87,7 @@ function App() {
           name="saveEditor"
           editorProps={{ $blockScrolling: true, $width: '100%' }}
         />
-        <Button onClick={save}>Save</Button>
+        <Button onClick={save}>Generate savefile</Button>
         {isSaved ?
           <>
             <Button onClick={downloadTxtFile}>Download!</Button>
