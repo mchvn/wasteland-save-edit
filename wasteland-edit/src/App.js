@@ -9,35 +9,23 @@ import 'brace/ext/searchbox'
 import FileSelector from './components/FileSelector'
 import DecompressionWorker from './utils/decompression.worker.js';
 import lzf from 'lzfjs';
-
-const Button = styled.button`
-  padding: 10px;
-  background-color: #444;
-  cursor: pointer;
-  margin: 10px;
-  border: 0px solid;
-  font-size: 12;
-  border-radius: 4px;
-  color: white;
-  font-weight: bold;
-  &:hover {
-    color: black;
-  }
-`
-
+import Button from './components/Button'
 
 function App() {
 
   const [xml, setXml] = useState("<empty/>");
+  const [saveData, setSaveData] = useState("");
   const [dataSize, setDataSize] = useState(0); //decompressed, should be bigger
   const [saveDataSize, setSaveDataSize] = useState(0); //compressed, should be smaller
-  const [fileName, setFileName] = useState(''); //compressed, should be smaller
+  const [fileName, setFileName] = useState('');
+  const [isSaved, setSaved] = useState(false);
+
 
   //create a worker so that the decompression doesn't lock the UI
   const worker = new DecompressionWorker();
   worker.onmessage = (e) => {
     const { fileName, xml, dataSize, saveDataSize } = e.data
-    setXml((xml))
+    setXml(xml)
     setDataSize(dataSize)
     setSaveDataSize(saveDataSize)
     setFileName(fileName)
@@ -50,6 +38,7 @@ function App() {
    */
   const recompress = (data) => {
     const unformatted = unformat(data)
+    console.log(unformatted)
     const newData = compress(unformatted)
     return { newData, dSize: unformatted.length, sdSize: newData.byteLength }
   }
@@ -59,17 +48,21 @@ function App() {
    */
   const downloadTxtFile = () => {
     const element = document.createElement("a");
-    const { newData, dSize, sdSize } = recompress(xml)
-    console.log(dSize, sdSize)
-    const file = new Blob([newData], { type: 'text/plain' });
-    setDataSize(dSize)
-    setSaveDataSize(sdSize)
+    const file = new Blob([saveData], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
     element.download = fileName;
     document.body.appendChild(element);
     element.click();
   }
 
+  const save = () => {
+    const { newData, dSize, sdSize } = recompress(xml)
+    setSaveData(newData)
+    console.log(dSize, sdSize)
+    setDataSize(dSize)
+    setSaveDataSize(sdSize)
+    setSaved(true)
+  }
 
   const compress = (text) => {
     var data = new Buffer(text);
@@ -80,11 +73,15 @@ function App() {
    * Displays file in editor
    * @param {Blob[]} files 
    */
-
   const showFile = async (files) => {
+    setXml('Processing...')
     worker.postMessage(files[0])  //just take the first file if mulitple are uploaded... in the future maybe show an error
   }
 
+  const updateXml = (newData) => {
+    setXml(newData)
+    setSaved(false)
+  }
 
 
   return (
@@ -93,23 +90,28 @@ function App() {
         <h1>Wasteland 3 Save Editor</h1>
         <div>To begin, load your save file below</div>
         <FileSelector onFileLoad={showFile} />
-        <div style={{ margin: '10px' }}>
-          <span>DataSize: {dataSize}</span>
-          <span> SaveDataSize: {saveDataSize}</span>
-        </div>
-
         <AceEditor
           mode="xml"
           theme="monokai"
-          onChange={setXml}
+          onChange={updateXml}
           width="100%"
           value={xml}
           name="saveEditor"
           editorProps={{ $blockScrolling: true, $width: '100%' }}
         />
-
-        <Button onClick={downloadTxtFile}>Download!</Button>
+        <Button onClick={save}>Save</Button>
+        {isSaved ?
+          <>
+            <Button onClick={downloadTxtFile}>Download!</Button>
+            <div>Use these values to update the corresponding metadata file:</div>
+            <div style={{ margin: '10px 0' }}>
+              <span>DataSize: {dataSize}</span>
+              <span> SaveDataSize: {saveDataSize}</span>
+            </div>
+          </>
+          : null}
       </div>
+
     </div>
   );
 }

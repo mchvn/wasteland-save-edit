@@ -63,7 +63,7 @@ export const formatXml = function (xml) {
     return formatted;
   };
 
-  export const unformat = (xml) => {
-    return xml.replaceAll('\n', '').replaceAll(' ', '').replaceAll('\t', '')
+  export const unformat = (data) => {
+    return data.replaceAll('\n', '').replaceAll(' ', '').replaceAll('\t', '')
   }
 
