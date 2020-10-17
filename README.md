@@ -19,3 +19,14 @@ This project is in MVP form-- it has all the basic functionality to work as inte
 ## What is this project built in?
 
 This project is built in React with JS.
+
+# Building
+
+To build the project, simply run the following commands:
+
+```
+cd wasteland-edit
+yarn install
+yarn run start
+```
+If you'd like an example save file to test with, you can use the file `13533802DD3E4554AD5FDCC4EBCFDA5A` in the root of the repo.
